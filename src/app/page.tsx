@@ -1,5 +1,5 @@
 "use client"
-import { createAccount, login } from "@/utils/DataServices";
+import { createAccount, getLoggedInUserData, login } from "@/utils/DataServices";
 import { Itoken } from "@/utils/Interfaces";
 import { Button, Checkbox, Label, TextInput } from "flowbite-react";
 import { useRouter } from "next/navigation";
@@ -42,11 +42,12 @@ const handleSubmit = async () => {
         if(typeof window != null){
           localStorage.setItem("Token", token.token);
           console.log(token.token)
+          await getLoggedInUserData(username);
 
           router.push('/Dashboard');
         }
       }else{
-        alert("Login was no good! Wrong Password or Something");
+        alert("Login was no good! Wrong Password or something like that")
       }
       
     }
