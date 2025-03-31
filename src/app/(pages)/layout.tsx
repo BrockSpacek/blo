@@ -1,3 +1,4 @@
+import NavbarComponent from '@/components/NavbarComponent';
 import React from 'react'
 
 const layout = ({
@@ -8,7 +9,7 @@ const layout = ({
 
   return (
     <div>
-      <h1>This is the nav bar that will float</h1>
+      <NavbarComponent />
       {children}
     </div>
   )

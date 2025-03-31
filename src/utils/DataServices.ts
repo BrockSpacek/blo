@@ -83,3 +83,24 @@ export const checkToken = () => {
   }
   return result;
 };
+
+
+// ------------------ Blog Endpoints --------------------
+
+export const getAllBlogs = async (token: string) => {
+  const res = await fetch(url + "Blog/GetAllBlogs", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    }
+  });
+  if(!res.ok){
+    const errorData = await res.json();
+    const message = errorData.message;
+    console.log(message);
+    return [];
+  }
+  const data = await res.json();
+  return data;
+}
