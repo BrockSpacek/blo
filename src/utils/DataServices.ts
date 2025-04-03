@@ -106,7 +106,8 @@ export const getAllBlogs = async (token: string) => {
   return data;
 }
 
-export const getBlogItemsByUserId = async (userId:number, token:string) => {
+export const getBlogItemsByUserId = async (userId: number, token: string) => {
+  console.log("Isaiah is really cool!")
   const res = await fetch(url + "Blog/GetBlogsByUserId/" + userId, {
     method: "GET",
     headers: {
@@ -121,6 +122,7 @@ export const getBlogItemsByUserId = async (userId:number, token:string) => {
     return [];
   }
   const data = await res.json();
+  console.log(data);
   return data;
 }
 
@@ -162,4 +164,27 @@ export const updateBlogItem = async (blog:IBlogItems, token:string) => {
   const data = await res.json();
   // return true we have successfully added our blog to our backend DB
   return data.success
+}
+
+export const DeleteBlogItem = async (blog:IBlogItems, token:string) => {
+  const res = await fetch(url + "Blog/DeleteBlog", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body:JSON.stringify(blog)
+  });
+  if(!res.ok){
+    const errorData = await res.json();
+    const message = errorData.message;
+    console.log(message);
+    return false;
+  }
+  const data = await res.json();
+  return data.success
+}
+
+export const getToken = () => {
+  return localStorage.getItem("Token") ?? "";
 }
