@@ -16,11 +16,12 @@ import {
   AccordionTitle,
   ListGroup,
 } from "flowbite-react";
-import { checkToken, getBlogItemsByUserId, getToken, loggedInData } from "@/utils/DataServices";
+import { addBlogItem, checkToken, DeleteBlogItem, getBlogItemsByUserId, getToken, loggedInData, updateBlogItem } from "@/utils/DataServices";
 import React, { useEffect, useState } from "react";
 import { IBlogItems } from "@/utils/Interfaces";
 import BlogEntires from "@/utils/BlogEntries.json";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 
 
 const page = () => {
@@ -78,6 +79,22 @@ const page = () => {
 
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // We're creating a new file reader object
+    let reader = new FileReader();
+
+    // Then we are going to get the first file we uploaded
+    let file = e.target.files?.[0]
+
+    // And if there is a file to select
+    if(file){
+      //When this file is turned into a string this onLoad function will run
+      reader.onload = () => {
+        setBlogImage(reader.result); // Once the file is read we will store the result into our setter function
+      }
+
+      reader.readAsDataURL(file); // This converts our file to a base64 encoded string
+    }
+  
 
   } 
 
@@ -86,31 +103,86 @@ const page = () => {
   const handleShow = () => {
     setOpenModal(true);
     setEdit(false);
+    setBlogId(0);
+    setBlogUserId(blogUserId);
+    setBlogPublisherName(blogPublisherName);
+    setBlogTitle("");
+    setBlogImage("");
+    setBlogDescription("");
+    setBlogCategories("");
   }
   
   const handleEdit = (items: IBlogItems) => {
     setOpenModal(true);
     setEdit(true);
+    setBlogId(items.id);
+    setBlogUserId(items.userId);
+    setBlogPublisherName(items.publisherName);
+    setBlogTitle(items.title);
+    setBlogImage(items.image);
+    setBlogDescription(items.description);
+    setBlogCategories(items.category);
   }
 
   const handlePublish = async (items:IBlogItems) => {
     items.isPublished = !items.isPublished;
+
+    let result = await updateBlogItem(items, getToken());
+
+    if(result){
+      let userBlogItems = await getBlogItemsByUserId(blogUserId, getToken());
+      setBlogItems(userBlogItems);
+    }else{
+      alert("Blog was not published");
+    }
   }
 
   const handleDelete = async (items:IBlogItems) => {
     items.isDeleted = true;
+
+    let result = await DeleteBlogItem(items, getToken());
+
+    if(result){
+      let userBlogItems = await getBlogItemsByUserId(blogUserId, getToken());
+      setBlogItems(userBlogItems)
+    }else{
+      alert("Blog Item(s) were not deleted")
+    }
   }
 
   // ----------------Save Function-------------------------
 
-  const handleSave = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const item = {}
+  const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
+
+    const item: IBlogItems = {
+      id: blogId,
+      userId: blogUserId,
+      publisherName: blogPublisherName,
+      title: blogTitle, 
+      image: blogImage,
+      description: blogDescription,
+      date: format(new Date(), 'MM-dd-yyyy'),
+      category: blogCategories,
+      isPublished: e.currentTarget.textContent === 'Save' ? false : true,
+      isDeleted: false
+    }
     setOpenModal(false);
+
+    let result = false;
 
     if(edit){
       // Our Edit Login Will go here
+      result = await updateBlogItem(item, getToken())
     }else{
       // Our Add Logic will go here
+      result = await addBlogItem(item, getToken());
+    }
+
+    if(result){
+      let userBlogItems = await getBlogItemsByUserId(blogUserId, getToken());
+      setBlogItems(userBlogItems); 
+    }else{
+      alert(`Blog Items were not ${edit ? 'Updated' : 'Added'}`);
     }
   }
 
@@ -118,7 +190,7 @@ const page = () => {
     <main className="flex min-h-screen flex-col p-24">
     <div className="flex flex-col items-center mb-10">
       <h1 className="text-center text-3xl"> Dashboard Page </h1>
-      <Button onClick={() => setOpenModal(true)}>Add Blog</Button>
+      <Button onClick={handleShow}>Add Blog</Button>
       <Modal show={openModal} onClose={() => setOpenModal(false)}>
         <ModalHeader>{edit ? 'Edit Blog Post' : 'Add Blog Post'}</ModalHeader>
         <ModalBody>
