@@ -2,13 +2,25 @@
 import { IBlogItems } from '@/utils/Interfaces'
 import React, { useEffect, useState } from 'react'
 import BlogEntries from "@/utils/BlogEntries.json"
+import { getAllBlogs, getToken } from '@/utils/DataServices'
 
 
 const page = () => {
   const [blogItems, setBlogItems] = useState<IBlogItems[]>(BlogEntries);
 
   useEffect(() =>{
-    
+    const getData = async () => {
+      const data: IBlogItems[] = await getAllBlogs(getToken());
+      console.log(data);
+
+      const filteredData = data.filter(item => item.isPublished && !item.isDeleted);
+      console.log(filteredData);
+
+      setBlogItems(filteredData);
+    }
+
+    getData();
+
   }, []);
   return (
     <div className='flex min-h-screen flex-col p-24'>

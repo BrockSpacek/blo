@@ -235,8 +235,8 @@ const page = () => {
           </form>
         </ModalBody>
         <ModalFooter>
-          <Button onClick={() => {handleSave}}>Save and publish</Button>
-          <Button onClick={() => {handleSave}}>Save</Button>
+          <Button onClick={handleSave}>Save and publish</Button>
+          <Button onClick={handleSave}>Save</Button>
           <Button color="gray" onClick={() => setOpenModal(false)}>
             Cancel
           </Button>
